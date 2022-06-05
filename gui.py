@@ -46,12 +46,17 @@ potentiometer_num = [0]
 pwm_num = [0]
 finished = False
 
+potentiometer_graph = LiveGraph(root, 0, 1023, 0, 3)
+pwm_graph = LiveGraph(root, 0, 2000, 1, 3)
+
 # reads data in a separate thread and manipulates global variables that can be accessed by other functions
 def read_data():
     global potentiometer_num, pwm_num
     while finished == False:
         data = reader.readLine()
+        potentiometer_graph.latest_val[0] = data[0]
         potentiometer_num[0] = data[0]
+        pwm_graph.latest_val[0] = data[1]
         pwm_num[0] = data[1]
         
 data_feed = threading.Thread(target=read_data)
@@ -61,9 +66,6 @@ def live_update():
     potentiometer_value['text'] = potentiometer_num[0]
     pwm_value['text'] = pwm_num[0]
     root.after(1, live_update)
-
-potentiometer_graph = LiveGraph()
-pwm_graph = LiveGraph()
 
 # runs when the X button is pressed on the window
 # closes other threads and exits the process
@@ -75,13 +77,6 @@ def on_closing():
     sys.exit()
 
 live_update() # to start the update loop
-
-potentiometer_canvas = FigureCanvasTkAgg(potentiometer_graph.fig, root)
-potentiometer_canvas.get_tk_widget().grid(column=0, row=3)
-potentiometer_ani = animation.FuncAnimation(potentiometer_graph.fig, potentiometer_graph.animate, fargs=(potentiometer_num, ), interval=50, blit=False)
-pwm_canvas = FigureCanvasTkAgg(pwm_graph.fig, root)
-pwm_canvas.get_tk_widget().grid(column=1, row=3)
-pwm_ani = animation.FuncAnimation(pwm_graph.fig, pwm_graph.animate, fargs=(pwm_num, ), interval=50, blit=False)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
