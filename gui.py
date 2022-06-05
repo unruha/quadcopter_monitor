@@ -1,5 +1,6 @@
 from tkinter import *
 from readserial import SerialReader
+from livegraph import LiveGraph
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
@@ -41,7 +42,7 @@ pwm_value.grid(
     column=1
 )
 
-potentiometer_num = 0
+potentiometer_num = [0]
 pwm_num = 0
 finished = False
 
@@ -50,37 +51,38 @@ def read_data():
     global potentiometer_num, pwm_num
     while finished == False:
         data = reader.readLine()
-        potentiometer_num = data[0]
+        potentiometer_num[0] = data[0]
         pwm_num = data[1]
         
 data_feed = threading.Thread(target=read_data)
 data_feed.start()
 
 def live_update():
-    global potentiometer_num, pwm_num
-    potentiometer_value['text'] = potentiometer_num
+    potentiometer_value['text'] = potentiometer_num[0]
     pwm_value['text'] = pwm_num
     root.after(1, live_update)
 
-xar = []
-yar = []
-for i in range(1, 1001):
-    xar.append(i)
-    yar.append(0)
-fig = plt.figure(figsize=(8, 5), dpi=100)
-ax = fig.add_subplot(1, 1, 1)
-ax.set_ylim(0, 1023)
-ax.axes.xaxis.set_visible(False)
-line, = ax.plot(xar, yar)
-count = -1
+potentiometer_graph = LiveGraph()
 
-def animate(i):
-    global count, yar, xar, potentiometer_num, line
-    if count < 1000:
-        count = count + 1
-    yar.append(int(potentiometer_num))
-    yar = yar[-count:]
-    line.set_data(xar[-count:], yar)
+# xar = []
+# yar = []
+# for i in range(1, 1001):
+#     xar.append(i)
+#     yar.append(0)
+# fig = plt.figure(figsize=(8, 5), dpi=100)
+# ax = fig.add_subplot(1, 1, 1)
+# ax.set_ylim(0, 1023)
+# ax.axes.xaxis.set_visible(False)
+# line, = ax.plot(xar, yar)
+# count = -1
+
+# def animate(i):
+#     global count, yar, xar, potentiometer_num, line
+#     if count < 1000:
+#         count = count + 1
+#     yar.append(int(potentiometer_num))
+#     yar = yar[-count:]
+#     line.set_data(xar[-count:], yar)
 
 # runs when the X button is pressed on the window
 # closes other threads and exits the process
@@ -93,9 +95,9 @@ def on_closing():
 
 live_update() # to start the update loop
 
-plotcanvas = FigureCanvasTkAgg(fig, root)
+plotcanvas = FigureCanvasTkAgg(potentiometer_graph.fig, root)
 plotcanvas.get_tk_widget().grid(column=0, row=3)
-ani = animation.FuncAnimation(fig, animate, interval=50, blit=False)
+ani = animation.FuncAnimation(potentiometer_graph.fig, potentiometer_graph.animate, fargs=(potentiometer_num, ), interval=50, blit=False)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
