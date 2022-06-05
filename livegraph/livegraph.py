@@ -8,7 +8,7 @@ class LiveGraph:
         for i in range(1, 1001):
             self.xar.append(i)
             self.yar.append(0)
-        self.fig = plt.figure(figsize=(8, 5), dpi=100)
+        self.fig = plt.figure(figsize=(6, 4), dpi=100)
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_ylim(0, 1023)
         self.ax.axes.xaxis.set_visible(False)

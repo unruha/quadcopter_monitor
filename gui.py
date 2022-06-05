@@ -43,7 +43,7 @@ pwm_value.grid(
 )
 
 potentiometer_num = [0]
-pwm_num = 0
+pwm_num = [0]
 finished = False
 
 # reads data in a separate thread and manipulates global variables that can be accessed by other functions
@@ -52,37 +52,18 @@ def read_data():
     while finished == False:
         data = reader.readLine()
         potentiometer_num[0] = data[0]
-        pwm_num = data[1]
+        pwm_num[0] = data[1]
         
 data_feed = threading.Thread(target=read_data)
 data_feed.start()
 
 def live_update():
     potentiometer_value['text'] = potentiometer_num[0]
-    pwm_value['text'] = pwm_num
+    pwm_value['text'] = pwm_num[0]
     root.after(1, live_update)
 
 potentiometer_graph = LiveGraph()
-
-# xar = []
-# yar = []
-# for i in range(1, 1001):
-#     xar.append(i)
-#     yar.append(0)
-# fig = plt.figure(figsize=(8, 5), dpi=100)
-# ax = fig.add_subplot(1, 1, 1)
-# ax.set_ylim(0, 1023)
-# ax.axes.xaxis.set_visible(False)
-# line, = ax.plot(xar, yar)
-# count = -1
-
-# def animate(i):
-#     global count, yar, xar, potentiometer_num, line
-#     if count < 1000:
-#         count = count + 1
-#     yar.append(int(potentiometer_num))
-#     yar = yar[-count:]
-#     line.set_data(xar[-count:], yar)
+pwm_graph = LiveGraph()
 
 # runs when the X button is pressed on the window
 # closes other threads and exits the process
@@ -95,9 +76,12 @@ def on_closing():
 
 live_update() # to start the update loop
 
-plotcanvas = FigureCanvasTkAgg(potentiometer_graph.fig, root)
-plotcanvas.get_tk_widget().grid(column=0, row=3)
-ani = animation.FuncAnimation(potentiometer_graph.fig, potentiometer_graph.animate, fargs=(potentiometer_num, ), interval=50, blit=False)
+potentiometer_canvas = FigureCanvasTkAgg(potentiometer_graph.fig, root)
+potentiometer_canvas.get_tk_widget().grid(column=0, row=3)
+potentiometer_ani = animation.FuncAnimation(potentiometer_graph.fig, potentiometer_graph.animate, fargs=(potentiometer_num, ), interval=50, blit=False)
+pwm_canvas = FigureCanvasTkAgg(pwm_graph.fig, root)
+pwm_canvas.get_tk_widget().grid(column=1, row=3)
+pwm_ani = animation.FuncAnimation(pwm_graph.fig, pwm_graph.animate, fargs=(pwm_num, ), interval=50, blit=False)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
