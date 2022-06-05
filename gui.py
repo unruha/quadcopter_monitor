@@ -1,9 +1,6 @@
 from tkinter import *
 from readserial import SerialReader
 from livegraph import LiveGraph
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.animation as animation
 import threading
 import sys
 
