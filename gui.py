@@ -11,7 +11,11 @@ reader = SerialReader(arduino_port, baud)
 root = Tk()
 
 root.title("Quadcopter Monitor")
-root.geometry("900x700")
+#getting screen width and height of display
+width = root.winfo_screenwidth()
+height = root.winfo_screenheight()
+#setting tkinter window size
+root.geometry("%dx%d" % (width, height))
 
 potentiometer_label = Label(root, text="Potentiometer Value:", font=("Helvetica", 18, "bold"))
 pwm_label = Label(root, text="PWM Value:", font=("Helvetica", 18, "bold"))
